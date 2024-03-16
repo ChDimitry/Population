@@ -53,25 +53,21 @@ class Sprite(pygame.sprite.Sprite):
             # Avoid hitting other sprites
             self.avoid_collisions(sprites)
 
-            if self.health <= 95: 
-                if self.recharge_point not in charging_points:
-                    self.recharge_point = self.__get_closest_charge(charging_points)
-                if self.recharge_point:
-                    self.decision_maker.add_decision(Decision.GO_CHARGE, 1000)
-                    if self.__at_recharge_point():
-                        self.health = 100
-                        self.decision_maker.remove_decision(Decision.GO_CHARGE)
-                        charging_points.remove(self.recharge_point)
 
-            if self.health < 10:
-                self.just_die(sprites)
+            self.__check_health(sprites, charging_points, 80, 10)
+            self.do_scout(action_name)
             
             # Reset decision delay and time since last decision
             self.decision_delay = random.randint(self.min_delay, self.max_delay)
             self.time_since_last_decision = 0
 
+
+
+
+
+
     def draw(self, screen):
-        if self.health <= 95:     
+        if self.health <= 80:     
             self.image.fill(self.hungry_sprite_color)
         if self.__at_recharge_point():
             self.image.fill(self.sprite_color)
@@ -80,6 +76,22 @@ class Sprite(pygame.sprite.Sprite):
         for sprite, rect in self.trail_sprites:
             screen.blit(sprite, rect)
         screen.blit(self.image, self.rect)
+
+
+    def __check_health(self, sprites, charging_points, charge_health, death_health):
+        if self.health <= charge_health:
+            if self.recharge_point not in charging_points:
+                self.recharge_point = self.__get_closest_charge(charging_points)
+            if self.recharge_point:
+                self.decision_maker.add_decision(Decision.GO_CHARGE, 1000)
+                if self.__at_recharge_point():
+                    self.health = 100
+                    self.decision_maker.remove_decision(Decision.GO_CHARGE)
+                    charging_points.remove(self.recharge_point)
+
+        if self.health < death_health:
+            self.just_die(sprites)
+
 
     def go_charge(self):
         target_center_x = self.recharge_point.rect.centerx
@@ -165,6 +177,9 @@ class Sprite(pygame.sprite.Sprite):
         if self.recharge_point:
             # Check if the sprite is at the recharge point
             return pygame.sprite.collide_rect(self, self.recharge_point)
+
+    def do_scout(self, action_name):
+        pass
 
     def move_up(self):
         self.rect.y -= 1
