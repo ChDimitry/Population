@@ -22,7 +22,7 @@ max_delay = 2
 charging_points = [ChargingPoint((80, 114, 123), 5, 5, (random.randint(0, 1595), random.randint(0, 1195))) for _ in range(100)]
 charging_point_group = pygame.sprite.Group(charging_points)
 
-sprite_pool = [Sprite((80, 114, 123), 5, 5, min_delay, max_delay) for _ in range(2)]
+sprite_pool = [Sprite((80, 114, 123), 5, 5, min_delay, max_delay) for _ in range(1)]
 active_sprite_group = pygame.sprite.Group(sprite_pool[0:])
 
 # pointer = Pointer((255, 255, 255), 5, 5)

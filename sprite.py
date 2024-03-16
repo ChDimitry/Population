@@ -3,7 +3,6 @@ import random
 import math
 from decision_module import DecisionModule
 from decision import Decision
-from charging_point import ChargingPoint
 
 class Sprite(pygame.sprite.Sprite):
     def __init__(self, color, width, height, min_delay, max_delay):
@@ -55,14 +54,11 @@ class Sprite(pygame.sprite.Sprite):
 
 
             self.__check_health(sprites, charging_points, 80, 10)
-            self.do_scout(action_name)
+            # self.do_scout(action_name)
             
             # Reset decision delay and time since last decision
             self.decision_delay = random.randint(self.min_delay, self.max_delay)
             self.time_since_last_decision = 0
-
-
-
 
 
 
@@ -77,7 +73,6 @@ class Sprite(pygame.sprite.Sprite):
             screen.blit(sprite, rect)
         screen.blit(self.image, self.rect)
 
-
     def __check_health(self, sprites, charging_points, charge_health, death_health):
         if self.health <= charge_health:
             if self.recharge_point not in charging_points:
@@ -91,7 +86,6 @@ class Sprite(pygame.sprite.Sprite):
 
         if self.health < death_health:
             self.just_die(sprites)
-
 
     def go_charge(self):
         target_center_x = self.recharge_point.rect.centerx
@@ -179,7 +173,19 @@ class Sprite(pygame.sprite.Sprite):
             return pygame.sprite.collide_rect(self, self.recharge_point)
 
     def do_scout(self, action_name):
-        pass
+        move_actions = [action.value for action in Decision if action.value.startswith("move_")]
+
+        # Check if the action_name is a valid move action
+        if action_name in move_actions:
+            # Randomly select an action to prioritize
+            if random.randint(0, 10) == 0:
+                print(action_name)
+                # Update probabilities for all move actions
+                for action in move_actions:
+                    if action != action_name:
+                        self.decision_maker.remove_decision(action)
+                # Update probability for the selected action
+                self.decision_maker.update_probability(action_name, 100)
 
     def move_up(self):
         self.rect.y -= 1
