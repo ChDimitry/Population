@@ -3,6 +3,7 @@ import random
 import math
 from decision_module import DecisionModule
 from decision import Decision
+import re
 
 class Sprite(pygame.sprite.Sprite):
     def __init__(self, color, width, height, min_delay, max_delay):
@@ -12,9 +13,9 @@ class Sprite(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = random.randint(100, 1400)
         self.rect.y = random.randint(100, 800)
-        self.sprite_color = (80, 114, 123)
+        self.sprite_color = color
         # (76, 205, 153)
-        self.hungry_sprite_color = (80, 114, 123)
+        self.hungry_sprite_color = self.sprite_color
 
         self.health = 100
         self.action_penalty = 0.1
@@ -23,14 +24,14 @@ class Sprite(pygame.sprite.Sprite):
         self.min_delay = min_delay
         # Create a decision maker with dynamic decisions
         self.decision_maker = DecisionModule()
-        self.decision_maker.add_decision(Decision.MOVE_UP, 0.25)
-        self.decision_maker.add_decision(Decision.MOVE_DOWN, 0.25)
-        self.decision_maker.add_decision(Decision.MOVE_LEFT, 0.25)
-        self.decision_maker.add_decision(Decision.MOVE_RIGHT, 0.25)
-        self.decision_maker.add_decision(Decision.DO_NOTHING, 0.0)
-
+        self.decision_maker.add_decision("move_up", 0.25)
+        self.decision_maker.add_decision("move_down", 0.25)
+        self.decision_maker.add_decision("move_left", 0.25)
+        self.decision_maker.add_decision("move_right", 0.25)
+        # self.decision_maker.add_decision("do_nothing", 0.10)
         self.decision_delay = random.randint(min_delay, max_delay)
         self.time_since_last_decision = 0
+        self.removed_decisions = []
 
         self.recharging = False
         self.recharge_point = None
@@ -39,7 +40,7 @@ class Sprite(pygame.sprite.Sprite):
 
         self.trail_length = 10
         self.trail_width = 10
-        self.trail_color = (204, 211, 202)
+        self.trail_color = self.sprite_color
         self.trail_sprites = []
         self.trail_spawn_delay = 50
         self.last_trail_spawn_time = 0
@@ -54,13 +55,11 @@ class Sprite(pygame.sprite.Sprite):
 
 
             self.__check_health(sprites, charging_points, 80, 10)
-            # self.do_scout(action_name)
+            self.do_scout(action_name)
             
             # Reset decision delay and time since last decision
             self.decision_delay = random.randint(self.min_delay, self.max_delay)
             self.time_since_last_decision = 0
-
-
 
     def draw(self, screen):
         if self.health <= 80:     
@@ -73,16 +72,20 @@ class Sprite(pygame.sprite.Sprite):
             screen.blit(sprite, rect)
         screen.blit(self.image, self.rect)
 
+        # if self.__at_recharge_point():
+        #     pygame.draw.circle(screen, (255, 0, 0), (self.rect.centerx, self.rect.centery), pygame.time.get_ticks, 2)
+
     def __check_health(self, sprites, charging_points, charge_health, death_health):
         if self.health <= charge_health:
             if self.recharge_point not in charging_points:
                 self.recharge_point = self.__get_closest_charge(charging_points)
             if self.recharge_point:
-                self.decision_maker.add_decision(Decision.GO_CHARGE, 1000)
+                self.decision_maker.add_decision("go_charge", 1000)
                 if self.__at_recharge_point():
                     self.health = 100
-                    self.decision_maker.remove_decision(Decision.GO_CHARGE)
+                    self.decision_maker.remove_decision("go_charge")
                     charging_points.remove(self.recharge_point)
+                    self.recharge_point = None
 
         if self.health < death_health:
             self.just_die(sprites)
@@ -140,7 +143,7 @@ class Sprite(pygame.sprite.Sprite):
         return self.decision_maker.make_decision()
 
     def __get_action(self, decision):
-        action_name = decision.value.lower()
+        action_name = decision
         action_method = getattr(self, action_name, None)
         return action_method, action_name
 
@@ -173,19 +176,22 @@ class Sprite(pygame.sprite.Sprite):
             return pygame.sprite.collide_rect(self, self.recharge_point)
 
     def do_scout(self, action_name):
-        move_actions = [action.value for action in Decision if action.value.startswith("move_")]
-
+        decisions = self.decision_maker.get_decisions_list()
+        move_decisions = [decision['name'] for decision in decisions if decision['name'].startswith('move_')]
         # Check if the action_name is a valid move action
-        if action_name in move_actions:
+        if action_name in move_decisions:
             # Randomly select an action to prioritize
-            if random.randint(0, 10) == 0:
-                print(action_name)
+            if random.randint(0, 50) == 0:
                 # Update probabilities for all move actions
-                for action in move_actions:
-                    if action != action_name:
-                        self.decision_maker.remove_decision(action)
-                # Update probability for the selected action
-                self.decision_maker.update_probability(action_name, 100)
+                for decision in move_decisions:
+                    if decision != action_name:
+                        self.removed_decisions.append(decision)
+                        self.decision_maker.remove_decision(decision)
+        ticks = pygame.time.get_ticks()
+        if ticks % 11 == 0:
+            for decision in self.removed_decisions:
+                self.decision_maker.add_decision(decision, 0.25)
+
 
     def move_up(self):
         self.rect.y -= 1

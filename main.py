@@ -4,6 +4,7 @@ import psutil
 from charging_point import ChargingPoint
 from sprite import Sprite
 
+
 # Initialize Pygame
 pygame.init()
 
@@ -18,11 +19,16 @@ clock = pygame.time.Clock()
 min_delay = 2
 max_delay = 2
 
+
 # Create charging points
-charging_points = [ChargingPoint((80, 114, 123), 5, 5, (random.randint(0, 1595), random.randint(0, 1195))) for _ in range(100)]
+charging_points = [ChargingPoint((0, 34, 77), 5, 5, (random.randint(0, 1595), random.randint(0, 1195))) for _ in range(300)]
 charging_point_group = pygame.sprite.Group(charging_points)
 
-sprite_pool = [Sprite((80, 114, 123), 5, 5, min_delay, max_delay) for _ in range(1)]
+# Draw shadows for charging points
+for charging_point in charging_points:
+    charging_point.draw(screen)
+
+sprite_pool = [Sprite((160, 21, 62), 5, 5, min_delay, max_delay) for _ in range(50)]
 active_sprite_group = pygame.sprite.Group(sprite_pool[0:])
 
 # pointer = Pointer((255, 255, 255), 5, 5)
@@ -45,6 +51,9 @@ while running:
     # Draw active sprites
     for sprite in active_sprite_group:
         sprite.draw(screen)
+
+    for point in charging_point_group:
+        point.draw(screen)
 
     mouse_pos = pygame.mouse.get_pos()
     charging_point_group.update(mouse_pos)
