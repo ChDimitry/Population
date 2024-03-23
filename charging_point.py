@@ -27,6 +27,7 @@ class ChargingPoint(pygame.sprite.Sprite):
                 dy *= self.repulsion_force * repulsion_factor
                 self.rect.centerx -= dx
                 self.rect.centery -= dy
+        
 
     def draw(self, surface):
         # Draw shadows around the charging point

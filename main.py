@@ -3,6 +3,8 @@ import random
 import psutil
 from charging_point import ChargingPoint
 from sprite import Sprite
+from tower import Tower
+from pointer import Pointer
 
 
 # Initialize Pygame
@@ -21,32 +23,35 @@ max_delay = 2
 
 
 # Create charging points
-charging_points = [ChargingPoint((0, 34, 77), 5, 5, (random.randint(0, 1595), random.randint(0, 1195))) for _ in range(300)]
-charging_point_group = pygame.sprite.Group(charging_points)
+charging_point_group = pygame.sprite.Group()
 
-# Draw shadows for charging points
-for charging_point in charging_points:
-    charging_point.draw(screen)
-
-sprite_pool = [Sprite((160, 21, 62), 5, 5, min_delay, max_delay) for _ in range(50)]
+sprite_pool = [Sprite((238, 237, 235), 5, 5, min_delay, max_delay) for _ in range(1)]
 active_sprite_group = pygame.sprite.Group(sprite_pool[0:])
 
-# pointer = Pointer((255, 255, 255), 5, 5)
-# pointer_group = pygame.sprite.GroupSingle(pointer)
+tower = Tower((116, 114, 100), 5, 5, ((1600 // 2) - 25 // 2, (1200 // 2) - 25 // 2))
+
+missile_group = pygame.sprite.Group()
+
+shrapnel_group = pygame.sprite.Group()
+
+pointer = Pointer((255, 255, 255), 5, 5, missile_group)
 
 # Game loop
 running = True
 while running:
     # Handle events
+    mouse_clicked = False
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_clicked = True
 
     # Update active sprites
     active_sprite_group.update(active_sprite_group, charging_point_group)
 
     # Clear the screen
-    screen.fill((53, 55, 75))
+    screen.fill((60, 54, 51))
 
     # Draw active sprites
     for sprite in active_sprite_group:
@@ -55,12 +60,23 @@ while running:
     for point in charging_point_group:
         point.draw(screen)
 
+    for missile in missile_group:
+        missile.draw(screen)
+
     mouse_pos = pygame.mouse.get_pos()
     charging_point_group.update(mouse_pos)
     charging_point_group.draw(screen)
 
     # pointer_group.update()
     # pointer_group.draw(screen)
+
+    tower.update(charging_point_group)
+    tower.draw(screen)
+
+    pointer.update(mouse_clicked)
+    pointer.draw(screen)
+
+    missile_group.update()
     
     # Print CPU and RAM usage
     cpu_usage = float(psutil.cpu_percent())

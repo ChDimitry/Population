@@ -40,7 +40,7 @@ class Sprite(pygame.sprite.Sprite):
 
         self.trail_length = 10
         self.trail_width = 10
-        self.trail_color = self.sprite_color
+        self.trail_color = (45, 39, 36)
         self.trail_sprites = []
         self.trail_spawn_delay = 50
         self.last_trail_spawn_time = 0
