@@ -1,4 +1,3 @@
-import math
 import pygame
 from missile import Missile
 
@@ -9,17 +8,19 @@ class Pointer(pygame.sprite.Sprite):
         self.image.fill(color)
         self.rect = self.image.get_rect()
         self.missile_group = missile_group
+        self.fire_rate = 50
+        self.fire_delay = 0
 
-    def update(self, mouse_clicked):
+    def update(self, mouse_clicked, mouse_pos):
         self.clicked = mouse_clicked
-        mouse_pos = pygame.mouse.get_pos()
         self.rect.center = mouse_pos
 
-        if self.clicked:
-            missile = Missile((255, 199, 0), 5, 5, (self.rect.centerx, 0), mouse_pos)
+        self.fire_delay -= 1
+
+        if self.clicked and self.fire_delay <= 0:
+            missile = Missile(color=(251, 250, 218), width=5, height=5, start_pos=(self.rect.centerx, 0), target_pos=mouse_pos)
             self.missile_group.add(missile)
-            print("Missile launched!")
+            self.fire_delay = self.fire_rate  # Reset fire delay
 
     def draw(self, surface):
-        # pygame.draw.circle(surface, (255, 0, 0), self.rect.center, 10)
         pass

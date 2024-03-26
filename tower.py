@@ -22,7 +22,7 @@ class Tower(pygame.sprite.Sprite):
         self.production_ready = 300 
 
     def get_charging_point(self, charging_points):
-        charging_point = ChargingPoint((179, 163, 152), 5, 5, (self.rect.centerx, self.rect.centery))
+        charging_point = ChargingPoint((253, 175, 123), 5, 5, (self.rect.centerx, self.rect.centery))
         charging_points.add(charging_point)
         return charging_point
 
@@ -64,6 +64,7 @@ class Tower(pygame.sprite.Sprite):
         if self.production_progress >= self.production_ready:
             self.production_progress = 0
             if random.randint(0, 3) == 0:
+                # 33%
                 self.shoot_charging_point(charging_points)
 
         if len(self.produced_charging_points) > 0:

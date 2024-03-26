@@ -12,7 +12,7 @@ class ChargingPoint(pygame.sprite.Sprite):
         self.repulsion_force = 2
         self.shadow_color = (0, 0, 0, random.randint(4, 10))
 
-    def update(self, mouse_pos):
+    def update(self, mouse_clicked, mouse_pos):
         dx = mouse_pos[0] - self.rect.centerx
         dy = mouse_pos[1] - self.rect.centery
         distance = math.hypot(dx, dy)
@@ -27,18 +27,29 @@ class ChargingPoint(pygame.sprite.Sprite):
                 dy *= self.repulsion_force * repulsion_factor
                 self.rect.centerx -= dx
                 self.rect.centery -= dy
+
+        # if mouse_clicked:
+        #     # push the charge away from the click into a random direction
+        #     random_angle = random.uniform(0, 2 * math.pi)
+        #     dx = math.cos(random_angle)
+        #     dy = math.sin(random_angle)
+        #     self.rect.centerx += dx * 10
+        #     self.rect.centery += dy * 10
+
+            
         
 
     def draw(self, surface):
-        # Draw shadows around the charging point
-        shadow_offsets = [
-            (-5, -5), (0, -5), (5, -5),
-            (-5, 0),           (5, 0),
-            (-5, 5),  (0, 5),  (5, 5)
-        ]
+        # # Draw shadows around the charging point
+        # shadow_offsets = [
+        #     (-5, -5), (0, -5), (5, -5),
+        #     (-5, 0),           (5, 0),
+        #     (-5, 5),  (0, 5),  (5, 5)
+        # ]
 
-        for offset in shadow_offsets:
-            shadow_rect = self.rect.move(offset)
-            shadow_surface = pygame.Surface((5, 5), pygame.SRCALPHA)
-            shadow_surface.fill(self.shadow_color)
-            surface.blit(shadow_surface, shadow_rect)
+        # for offset in shadow_offsets:
+        #     shadow_rect = self.rect.move(offset)
+        #     shadow_surface = pygame.Surface((5, 5), pygame.SRCALPHA)
+        #     shadow_surface.fill(self.shadow_color)
+        #     surface.blit(shadow_surface, shadow_rect)
+        pass
